@@ -19,9 +19,12 @@ with zipfile.ZipFile(apk) as z:
     assert any('xr003' in n.lower() for n in names), 'missing native lobby entry'
     for space in ('intro', 'lobby', 'preview', 'practice', 'settings'):
         assert any('spaces/' + space in n.lower() for n in names), 'missing route: ' + space
+    assert any('xr004' in n.lower() for n in names), 'missing XR004 entry'
+    assert any('cloud/config.json' in n.lower() for n in names), 'missing public cloud config'
 meta = run(bt/'aapt', 'dump', 'badging', apk)
 assert f"package: name='com.pottersheep.batrunning.xr.{slug}'" in meta, meta
 assert 'arm64-v8a' in meta, meta
+assert 'android.permission.INTERNET' in meta, meta
 print(meta)
 assert f"versionCode='{version}'" in meta, meta
 signed = run(bt/'apksigner', 'verify', '--verbose', '--print-certs', apk)

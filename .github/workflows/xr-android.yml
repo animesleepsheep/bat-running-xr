@@ -11,6 +11,8 @@ on:
     paths:
       - 'project.godot'
       - 'assets/**'
+      - 'cloud/**'
+      - 'supabase/**'
       - 'openxr_action_map.tres'
       - 'export_presets.cfg'
       - 'scenes/**'
@@ -26,8 +28,25 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     timeout-minutes: 35
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: ci_only_password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v5
+      - name: Verify isolated PostgreSQL RLS contract
+        env:
+          DB_CONTAINER: ${{ job.services.postgres.id }}
+        run: |
+          mkdir -p dist
+          cat tools/db_fixture.sql supabase/xr004.sql tools/db_test.sql | docker exec -i "$DB_CONTAINER" psql -U postgres -v ON_ERROR_STOP=1 | tee dist/database.log
+          grep -q XR004_RLS_PASS dist/database.log
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -75,7 +94,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v5
         with:
-          name: BAT_RUNNING_XR003_APKs
+          name: BAT_RUNNING_XR004_APKs
           path: |
             dist/*.apk
             dist/SHA256SUMS.txt
@@ -88,6 +107,6 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v5
         with:
-          name: XR003_failure_logs
+          name: XR004_failure_logs
           path: dist/*.log
           if-no-files-found: ignore

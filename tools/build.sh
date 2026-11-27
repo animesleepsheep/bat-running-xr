@@ -74,19 +74,21 @@ export GODOT_ANDROID_KEYSTORE_DEBUG_USER=androiddebugkey
 export GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=android
 timeout 180 "$GODOT" --headless --path "$ROOT" --editor --import --quit 2>&1 | tee dist/import.log
 timeout 60 "$GODOT" --headless --path "$ROOT" --xr-mode off res://scenes/xr002.tscn -- --smoke 2>&1 | tee dist/regression.log
+timeout 60 "$GODOT" --headless --path "$ROOT" --xr-mode off res://scenes/xr003.tscn -- --smoke 2>&1 | tee dist/xr003-regression.log
 timeout 60 "$GODOT" --headless --path "$ROOT" --xr-mode off -- --smoke 2>&1 | tee dist/smoke.log
 grep -q XR001_SMOKE_PASS dist/regression.log
 grep -q XR002_SMOKE_PASS dist/regression.log
-grep -q XR003_SMOKE_PASS dist/smoke.log
-if grep -Eq "SCRIPT ERROR|Parse Error" dist/import.log dist/regression.log dist/smoke.log; then exit 1; fi
+grep -q XR003_SMOKE_PASS dist/xr003-regression.log
+grep -q XR004_SMOKE_PASS dist/smoke.log
+if grep -Eq "SCRIPT ERROR|Parse Error" dist/import.log dist/regression.log dist/xr003-regression.log dist/smoke.log; then exit 1; fi
 for entry in 'Quest 3|quest3' 'Focus 3|focus3'; do
   IFS='|' read -r preset slug <<< "$entry"
-  apk="$ROOT/dist/BAT_RUNNING_XR003_$slug.apk"
+  apk="$ROOT/dist/BAT_RUNNING_XR004_$slug.apk"
   rm -f "$apk"
   prepare_android
   "$GODOT" --headless --path "$ROOT" "$EXPORT_FLAG" "$preset" "$apk" 2>&1 | tee "dist/$slug-build.log"
   test -s "$apk"
-  python3 tools/check_apk.py "$apk" "$SDK" "$slug" 4 "$MODE" | tee "dist/$slug-verify.log"
+  python3 tools/check_apk.py "$apk" "$SDK" "$slug" 5 "$MODE" | tee "dist/$slug-verify.log"
 done
 python3 tools/check_update_pair.py dist/quest3-verify.log dist/focus3-verify.log
 (cd dist && sha256sum *.apk > SHA256SUMS.txt)

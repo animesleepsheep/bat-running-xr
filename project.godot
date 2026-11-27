@@ -1,8 +1,8 @@
 config_version=5
 [application]
 config/name="BAT RUNNING XR"
-config/version="0.3.0"
-run/main_scene="res://scenes/xr003.tscn"
+config/version="0.4.0"
+run/main_scene="res://scenes/xr004.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
 [display]
