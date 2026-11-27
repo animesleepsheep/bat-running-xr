@@ -1,2 +1,12 @@
-# XR-000 status
-Source migrated from XR-000 local package. Cloud build and physical headset acceptance pending. Do not mark complete before both actual APKs and checks exist. The generic OpenXR loader is an initial compatibility test, not vendor-specific certification. No login or full game yet.
+# XR-000 HF2 — cloud build accepted (2026-11-27)
+- Source/build commit: 600d90b509a2a9c4d8580e8355adc26bc173b09f
+- Successful run: https://github.com/animesleepsheep/bat-running-xr/actions/runs/45925213526
+- Artifact: https://github.com/animesleepsheep/bat-running-xr/actions/runs/45925213526/artifacts/15166530523
+- Godot 4.6.1, Android ARM64, generic OpenXR loader, debug signature v2.
+- Headless scene construction and synthetic input routing smoke test passed.
+- Both APK exports, ZIP integrity, ARM64/OpenXR loader/assets and signature verification passed; downloaded APK hashes matched SHA256SUMS.txt.
+- Quest 3: BAT_RUNNING_XR000_quest3.apk (84289556 bytes), SHA256 515770638dd22ce1480d287df682d41e2467816f489e925f05cee40b26b224f2
+- Focus 3: BAT_RUNNING_XR000_focus3.apk (84289560 bytes), SHA256 3d54cea1b522e0098c9a237eb5de46bb6f38d8cf5ef4f564fa4a2542fd3261a9
+- Artifact ZIP SHA256 fbd2b1a7d71e590f6ded418a5ed74fc9a1f7bd51f731d689c804bcd335100d64
+- HF1 fixed missing sdkmanager; HF2 isolated generated Gradle files using .gdignore and recreated Android build tree per export.
+- Cloud compilation gate: PASS. Physical headset installation, stereo rendering, head tracking, controller tracking/input, recovery: NOT TESTED. This is a stationary lab, not the complete game. Generic OpenXR compatibility requires actual device verification. Debug signing is not durable across CI runs; establish protected stable signing before update releases.
