@@ -33,6 +33,25 @@ prepare_android() {
   touch "$ROOT/android/.gdignore" "$ROOT/android/build/.gdignore"
 }
 prepare_android
+# Protected release key is optional for lab builds and mandatory for release builds.
+MODE="${XR_SIGNING_MODE:-debug}"
+EXPORT_FLAG=--export-debug
+if [ "$MODE" = release ]; then
+  : "${XR_KEYSTORE_B64:?Missing protected keystore secret}"
+  : "${XR_KEY_ALIAS:?Missing key alias}"
+  : "${XR_KEY_PASSWORD:?Missing keystore password}"
+  : "${XR_CERT_SHA256:?Missing expected signer fingerprint}"
+  RELEASE_KEY="$TMP/release.keystore"
+  umask 077
+  printf '%s' "$XR_KEYSTORE_B64" | base64 -d > "$RELEASE_KEY"
+  export GODOT_ANDROID_KEYSTORE_RELEASE_PATH="$RELEASE_KEY"
+  export GODOT_ANDROID_KEYSTORE_RELEASE_USER="$XR_KEY_ALIAS"
+  export GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD="$XR_KEY_PASSWORD"
+  EXPORT_FLAG=--export-release
+elif [ "$MODE" != debug ]; then
+  echo "Invalid signing mode"; exit 1
+fi
+printf '%s\n' "$MODE" > dist/SIGNING_MODE.txt
 KEY="$HOME/.android/debug.keystore"
 mkdir -p "$(dirname "$KEY")"
 if [ ! -f "$KEY" ]; then
@@ -50,15 +69,16 @@ export GODOT_ANDROID_KEYSTORE_DEBUG_USER=androiddebugkey
 export GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=android
 timeout 180 "$GODOT" --headless --path "$ROOT" --editor --import --quit 2>&1 | tee dist/import.log
 timeout 60 "$GODOT" --headless --path "$ROOT" --xr-mode off -- --smoke 2>&1 | tee dist/smoke.log
-grep -q XR000_SMOKE_PASS dist/smoke.log
+grep -q XR001_SMOKE_PASS dist/smoke.log
 if grep -Eq "SCRIPT ERROR|Parse Error" dist/import.log dist/smoke.log; then exit 1; fi
 for entry in 'Quest 3|quest3' 'Focus 3|focus3'; do
   IFS='|' read -r preset slug <<< "$entry"
-  apk="$ROOT/dist/BAT_RUNNING_XR000_$slug.apk"
+  apk="$ROOT/dist/BAT_RUNNING_XR001_$slug.apk"
   rm -f "$apk"
   prepare_android
-  "$GODOT" --headless --path "$ROOT" --export-debug "$preset" "$apk" 2>&1 | tee "dist/$slug-build.log"
+  "$GODOT" --headless --path "$ROOT" "$EXPORT_FLAG" "$preset" "$apk" 2>&1 | tee "dist/$slug-build.log"
   test -s "$apk"
-  python3 tools/check_apk.py "$apk" "$SDK" "$slug" | tee "dist/$slug-verify.log"
+  python3 tools/check_apk.py "$apk" "$SDK" "$slug" 2 "$MODE" | tee "dist/$slug-verify.log"
 done
+python3 tools/check_update_pair.py dist/quest3-verify.log dist/focus3-verify.log
 (cd dist && sha256sum *.apk > SHA256SUMS.txt)

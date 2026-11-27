@@ -1,6 +1,8 @@
 """Fail closed: signed native APK structure; not headset testing."""
-import pathlib, subprocess, sys, zipfile
+import os, pathlib, re, subprocess, sys, zipfile
 apk, sdk, slug = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2]), sys.argv[3]
+version = int(sys.argv[4])
+mode = sys.argv[5]
 bt = sdk / 'build-tools' / '35.0.1'
 def run(*args):
     return subprocess.check_output([str(a) for a in args], stderr=subprocess.STDOUT, text=True)
@@ -15,5 +17,16 @@ meta = run(bt/'aapt', 'dump', 'badging', apk)
 assert f"package: name='com.pottersheep.batrunning.xr.{slug}'" in meta, meta
 assert 'arm64-v8a' in meta, meta
 print(meta)
-print(run(bt/'apksigner', 'verify', '--verbose', '--print-certs', apk))
+assert f"versionCode='{version}'" in meta, meta
+signed = run(bt/'apksigner', 'verify', '--verbose', '--print-certs', apk)
+print(signed)
+assert 'Verified using v2 scheme (APK Signature Scheme v2): true' in signed
+cert = re.search(r'Signer #1 certificate SHA-256 digest: ([0-9a-fA-F]+)', signed)
+assert cert, 'no certificate fingerprint'
+actual = cert.group(1).lower()
+if mode == 'release':
+    expected = os.environ['XR_CERT_SHA256'].lower().replace(':', '').strip()
+    assert actual == expected, 'unexpected release signer'
+print('XR_CERT_SHA256=' + actual)
+print('XR_VERSION_CODE=' + str(version))
 print('APK_STATIC_PASS — installation, tracking and stereo rendering remain unverified')

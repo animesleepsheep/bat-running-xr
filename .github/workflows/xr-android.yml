@@ -1,9 +1,16 @@
-name: XR-000 Android build
+name: BAT RUNNING XR Android build
 on:
   workflow_dispatch:
+    inputs:
+      signing:
+        description: Protected stable signer (release) or temporary test signer (debug)
+        type: choice
+        options: [debug, release]
+        default: debug
   push:
     paths:
       - 'project.godot'
+      - 'openxr_action_map.tres'
       - 'export_presets.cfg'
       - 'scenes/**'
       - 'scripts/**'
@@ -52,22 +59,29 @@ jobs:
           yes | "$SDKMANAGER" --sdk_root="$ANDROID_SDK_ROOT" --licenses >/dev/null
           set -o pipefail
           "$SDKMANAGER" --sdk_root="$ANDROID_SDK_ROOT" 'platform-tools' 'platforms;android-35' 'build-tools;35.0.1' 'ndk;28.1.13356709' 'cmake;3.10.2.4988404'
-      - name: Build and verify both debug APKs
+      - name: Build and verify both APKs
+        env:
+          XR_SIGNING_MODE: ${{ inputs.signing || 'debug' }}
+          XR_KEYSTORE_B64: ${{ secrets.XR_KEYSTORE_B64 }}
+          XR_KEY_ALIAS: ${{ secrets.XR_KEY_ALIAS }}
+          XR_KEY_PASSWORD: ${{ secrets.XR_KEY_PASSWORD }}
+          XR_CERT_SHA256: ${{ vars.XR_CERT_SHA256 }}
         run: bash tools/build.sh
       - name: Upload signed APKs and verification report
         if: success()
         uses: actions/upload-artifact@v5
         with:
-          name: BAT_RUNNING_XR000_APKs
+          name: BAT_RUNNING_XR001_APKs
           path: |
             dist/*.apk
             dist/SHA256SUMS.txt
+            dist/SIGNING_MODE.txt
             dist/*.log
           if-no-files-found: error
       - name: Upload diagnostics
         if: failure()
         uses: actions/upload-artifact@v5
         with:
-          name: XR000_failure_logs
+          name: XR001_failure_logs
           path: dist/*.log
           if-no-files-found: ignore
