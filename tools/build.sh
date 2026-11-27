@@ -22,9 +22,17 @@ if [ ! -f "$TEMPLATES/android_source.zip" ]; then
   unzip -q "$TMP/templates.tpz" -d "$TMP/templates"
   cp -a "$TMP/templates/templates/." "$TEMPLATES/"
 fi
-mkdir -p android/build
-unzip -oq "$TEMPLATES/android_source.zip" -d android/build
-printf '%s.stable\n' "$VERSION" > android/.build_version
+# Never let Godot scan generated Gradle resources or build outputs.
+mkdir -p android dist
+touch android/.gdignore dist/.gdignore
+prepare_android() {
+  rm -rf "$ROOT/android/build"
+  mkdir -p "$ROOT/android/build"
+  unzip -oq "$TEMPLATES/android_source.zip" -d "$ROOT/android/build"
+  printf '%s.stable\n' "$VERSION" > "$ROOT/android/.build_version"
+  touch "$ROOT/android/.gdignore" "$ROOT/android/build/.gdignore"
+}
+prepare_android
 KEY="$HOME/.android/debug.keystore"
 mkdir -p "$(dirname "$KEY")"
 if [ ! -f "$KEY" ]; then
@@ -48,6 +56,7 @@ for entry in 'Quest 3|quest3' 'Focus 3|focus3'; do
   IFS='|' read -r preset slug <<< "$entry"
   apk="$ROOT/dist/BAT_RUNNING_XR000_$slug.apk"
   rm -f "$apk"
+  prepare_android
   "$GODOT" --headless --path "$ROOT" --export-debug "$preset" "$apk" 2>&1 | tee "dist/$slug-build.log"
   test -s "$apk"
   python3 tools/check_apk.py "$apk" "$SDK" "$slug" | tee "dist/$slug-verify.log"
