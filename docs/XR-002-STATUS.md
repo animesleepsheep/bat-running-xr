@@ -1,2 +1,14 @@
-# XR-002 candidate 0.2.0 / versionCode 3
-Actual V5.1 procedural BAT branch ported to standalone Three.js source module (source-specific shapes, color, material, hierarchy). No screenshot reconstruction. Builds both standard and lite GLB, catalog with hashes, meshes, triangles, named pivots. Godot asset registry instantiates GLB and preview supports selection/reset, idle wing motion. Source adaptation omits original gameplay, boost effects, shadow, and other species. Original web archive unchanged. Cloud and device validation pending; debug signer is temporary.
+# XR-002 — cloud build accepted (2026-11-27)
+- Version 0.2.0 / versionCode 3, build commit c7a0a2de1973ae8fe8be749c5925c567a0ad3800.
+- Successful run: https://github.com/animesleepsheep/bat-running-xr/actions/runs/45928660685
+- Artifact: https://github.com/animesleepsheep/bat-running-xr/actions/runs/45928660685/artifacts/15166854607
+- Three.js revision 186, original V5.1 BAT branch manually adapted as standalone model factory; GLB conversion automated. Standard 27062 triangles / 349304 bytes, Lite 6998 triangles / 130608 bytes, both 54 meshes, 15 materials, 9 named animated pivots. Lite reduction 74.1%.
+- XR002_GLTF_PASS twice, XR002_ASSET_PASS, XR002_IMPORT_PASS twice, XR002_SMOKE_PASS (catalog, imports, pivots, mesh count, LOD switch), XR001_SMOKE_PASS (synthetic regression), APK_STATIC_PASS twice, XR001_PAIR_PASS versionCode 3. Both contain ARM64 Godot/OpenXR loader, both imported model scenes, import descriptors and catalog.
+- Downloaded artifact ZIP CRC and SHA256 verified: 6df2ff762b50cd9083a55a7022b3b6da5cf91bb8eb48c794299733cc915a0e76.
+- Quest APK 84806844 bytes SHA256 c3eb530e9420c90f9f8f17ef4340514cdb5fa38a493bb55c8ed5ddbdf73fb055
+- Focus APK 84806844 bytes SHA256 d5742ad9cbf5bedd733f67f4b7a82f9fb2a8e14ebf4542636e63f5061110d7ed
+- Standard GLB SHA256 c72b83a0b7d2bace5d3e7a885193db90bb101dc166d1b1dc16ee6338f66d2bf8
+- Lite GLB SHA256 0cdfad354bf09f1bd4d450cf276f31c3166d839beb535811e17e01acb63a9c0a
+- Both APK hashes matched SHA256SUMS.txt, both GLBs matched catalog and GLB v2 headers, named pivots, materials and vertex color checks. No hotfix required for this successful build.
+- Cloud build/asset acceptance: PASS. Physical appearance, head/controller tracking, rendering performance and actual installation remain untested. Debug signer is temporary; stable release signing and upgrade tests pending. Model is articulated groups + idle motion, not skeletal run animation. No complete game yet; original web project untouched.
+- Next: XR-003 brand intro, native 3D lobby, scene transitions, mascot integration and navigation.
