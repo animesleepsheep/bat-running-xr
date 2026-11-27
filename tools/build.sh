@@ -2,6 +2,11 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
+mkdir -p dist
+touch dist/.gdignore
+npm --prefix tools/assets install --no-audit --no-fund --ignore-scripts
+npm --prefix tools/assets run generate | tee dist/assets.log
+cp assets/generated/catalog.json dist/ASSET_CATALOG.json
 VERSION=4.6.1
 GODOT="${GODOT_BIN:-$HOME/.local/bin/godot-xr000}"
 SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
@@ -70,15 +75,16 @@ export GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=android
 timeout 180 "$GODOT" --headless --path "$ROOT" --editor --import --quit 2>&1 | tee dist/import.log
 timeout 60 "$GODOT" --headless --path "$ROOT" --xr-mode off -- --smoke 2>&1 | tee dist/smoke.log
 grep -q XR001_SMOKE_PASS dist/smoke.log
+grep -q XR002_SMOKE_PASS dist/smoke.log
 if grep -Eq "SCRIPT ERROR|Parse Error" dist/import.log dist/smoke.log; then exit 1; fi
 for entry in 'Quest 3|quest3' 'Focus 3|focus3'; do
   IFS='|' read -r preset slug <<< "$entry"
-  apk="$ROOT/dist/BAT_RUNNING_XR001_$slug.apk"
+  apk="$ROOT/dist/BAT_RUNNING_XR002_$slug.apk"
   rm -f "$apk"
   prepare_android
   "$GODOT" --headless --path "$ROOT" "$EXPORT_FLAG" "$preset" "$apk" 2>&1 | tee "dist/$slug-build.log"
   test -s "$apk"
-  python3 tools/check_apk.py "$apk" "$SDK" "$slug" 2 "$MODE" | tee "dist/$slug-verify.log"
+  python3 tools/check_apk.py "$apk" "$SDK" "$slug" 3 "$MODE" | tee "dist/$slug-verify.log"
 done
 python3 tools/check_update_pair.py dist/quest3-verify.log dist/focus3-verify.log
 (cd dist && sha256sum *.apk > SHA256SUMS.txt)

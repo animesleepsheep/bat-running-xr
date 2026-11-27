@@ -1,0 +1,2 @@
+# XR-002 candidate 0.2.0 / versionCode 3
+Actual V5.1 procedural BAT branch ported to standalone Three.js source module (source-specific shapes, color, material, hierarchy). No screenshot reconstruction. Builds both standard and lite GLB, catalog with hashes, meshes, triangles, named pivots. Godot asset registry instantiates GLB and preview supports selection/reset, idle wing motion. Source adaptation omits original gameplay, boost effects, shadow, and other species. Original web archive unchanged. Cloud and device validation pending; debug signer is temporary.

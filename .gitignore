@@ -3,3 +3,7 @@ android/
 dist/
 *.keystore
 *.jks
+
+assets/generated/
+tools/assets/node_modules/
+tools/assets/package-lock.json

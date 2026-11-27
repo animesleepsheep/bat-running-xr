@@ -13,6 +13,9 @@ with zipfile.ZipFile(apk) as z:
     assert any(n.startswith('lib/arm64-v8a/') and n.endswith('.so') for n in names), 'missing arm64 libraries'
     assert any('openxr' in n.lower() and n.endswith('.so') for n in names), 'no OpenXR loader found'
     assert any(n.startswith('assets/') for n in names), 'missing game assets'
+    assert any('bat_standard' in n for n in names), 'missing standard imported asset'
+    assert any('bat_lite' in n for n in names), 'missing lite imported asset'
+    assert any('catalog.json' in n for n in names), 'missing asset catalog'
 meta = run(bt/'aapt', 'dump', 'badging', apk)
 assert f"package: name='com.pottersheep.batrunning.xr.{slug}'" in meta, meta
 assert 'arm64-v8a' in meta, meta

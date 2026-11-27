@@ -10,6 +10,7 @@ on:
   push:
     paths:
       - 'project.godot'
+      - 'assets/**'
       - 'openxr_action_map.tres'
       - 'export_presets.cfg'
       - 'scenes/**'
@@ -27,6 +28,9 @@ jobs:
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
@@ -71,17 +75,19 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v5
         with:
-          name: BAT_RUNNING_XR001_APKs
+          name: BAT_RUNNING_XR002_APKs
           path: |
             dist/*.apk
             dist/SHA256SUMS.txt
             dist/SIGNING_MODE.txt
+            dist/ASSET_CATALOG.json
+            assets/generated/*.glb
             dist/*.log
           if-no-files-found: error
       - name: Upload diagnostics
         if: failure()
         uses: actions/upload-artifact@v5
         with:
-          name: XR001_failure_logs
+          name: XR002_failure_logs
           path: dist/*.log
           if-no-files-found: ignore

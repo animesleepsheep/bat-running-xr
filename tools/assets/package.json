@@ -1,0 +1,11 @@
+{
+  "name": "bat-running-xr-assets",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "three": "0.186.1"
+  },
+  "scripts": {
+    "generate": "node generate.mjs"
+  }
+}
