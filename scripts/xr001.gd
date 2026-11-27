@@ -1,9 +1,9 @@
 extends Node3D
 const Runtime = preload("res://scripts/xr_runtime.gd")
-const Panel = preload("res://scripts/xr_panel.gd")
+const SpatialPanel = preload("res://scripts/xr_panel.gd")
 const Edge = preload("res://scripts/xr_input.gd")
-var core: Node3D
-var panel: Node3D
+var core: Runtime
+var panel: SpatialPanel
 var status: Label3D
 var details: Label3D
 var count_label: Label3D
@@ -13,7 +13,7 @@ var tips: Array[MeshInstance3D] = []
 var hovered: Array[String] = ["", ""]
 var token: MeshInstance3D
 var token_home := Vector3(0.0, 1.18, -0.82)
-var owner := -1
+var grab_owner := -1
 var clicks := 0
 var grabs := 0
 var last_action := "READY"
@@ -66,7 +66,7 @@ func _build() -> void:
 		_mesh(self, Vector3(0.018, 0.02, 6.0), Vector3(i, -0.014, -1), Color("37566b"))
 	for i in range(-4, 3):
 		_mesh(self, Vector3(6.0, 0.02, 0.018), Vector3(0, -0.014, i), Color("37566b"))
-	panel = Panel.new()
+	panel = SpatialPanel.new()
 	add_child(panel)
 	panel.position = Vector3(0, 1.65, -2.4)
 	_mesh(panel, Vector3(3.15, 1.85, 0.08), Vector3(0, 0, -0.05), Color("192b43"))
@@ -107,11 +107,11 @@ func _process(_delta: float) -> void:
 	core.poll()
 	for i in range(2):
 		_update_ray(i)
-	if owner >= 0:
-		if not core.tracked[owner] or not core.focused or not core.grips[owner].get_has_tracking_data():
+	if grab_owner >= 0:
+		if not core.tracked[grab_owner] or not core.focused or not core.grips[grab_owner].get_has_tracking_data():
 			_drop()
 		else:
-			token.global_transform = core.grips[owner].global_transform * Transform3D(Basis.IDENTITY, Vector3(0, 0, -0.10))
+			token.global_transform = core.grips[grab_owner].global_transform * Transform3D(Basis.IDENTITY, Vector3(0, 0, -0.10))
 	for id in buttons:
 		var material: StandardMaterial3D = buttons[id].material_override
 		material.albedo_color = Color("427d71") if id in hovered else Color("365778")
@@ -156,21 +156,21 @@ func _activate(id: String, hand: int) -> void:
 
 func _grip(i: int, held: bool) -> void:
 	if not held:
-		if owner == i:
+		if grab_owner == i:
 			_drop()
 		return
-	if owner != -1 or not core.tracked[i] or not core.focused:
+	if grab_owner != -1 or not core.tracked[i] or not core.focused:
 		return
 	var hand: XRController3D = core.grips[i]
 	if hand.global_position.distance_to(token.global_position) <= 0.28:
-		owner = i
+		grab_owner = i
 		grabs += 1
 		last_action = "GRAB " + ("L" if i == 0 else "R")
 		core.pulse(i)
 		_refresh()
 
 func _drop() -> void:
-	owner = -1
+	grab_owner = -1
 	token.position = token_home
 	token.rotation = Vector3.ZERO
 	last_action = "RELEASE"
@@ -236,10 +236,10 @@ func _smoke() -> void:
 	_activate("test", 1)
 	if clicks != 2:
 		errors.append("dual select")
-	owner = 0
+	grab_owner = 0
 	token.position = Vector3(1, 2, 3)
 	_grip(0, false)
-	if owner != -1 or token.position != token_home:
+	if grab_owner != -1 or token.position != token_home:
 		errors.append("release cleanup")
 	_activate("reset", 0)
 	if clicks != 0 or grabs != 0:
