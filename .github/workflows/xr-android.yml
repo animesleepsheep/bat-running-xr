@@ -75,7 +75,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v5
         with:
-          name: BAT_RUNNING_XR002_APKs
+          name: BAT_RUNNING_XR003_APKs
           path: |
             dist/*.apk
             dist/SHA256SUMS.txt
@@ -88,6 +88,6 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v5
         with:
-          name: XR002_failure_logs
+          name: XR003_failure_logs
           path: dist/*.log
           if-no-files-found: ignore

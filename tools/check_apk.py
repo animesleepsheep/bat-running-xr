@@ -16,6 +16,9 @@ with zipfile.ZipFile(apk) as z:
     assert any('bat_standard' in n for n in names), 'missing standard imported asset'
     assert any('bat_lite' in n for n in names), 'missing lite imported asset'
     assert any('catalog.json' in n for n in names), 'missing asset catalog'
+    assert any('xr003' in n.lower() for n in names), 'missing native lobby entry'
+    for space in ('intro', 'lobby', 'preview', 'practice', 'settings'):
+        assert any('spaces/' + space in n.lower() for n in names), 'missing route: ' + space
 meta = run(bt/'aapt', 'dump', 'badging', apk)
 assert f"package: name='com.pottersheep.batrunning.xr.{slug}'" in meta, meta
 assert 'arm64-v8a' in meta, meta
