@@ -3,7 +3,6 @@ const Cloud = preload("res://scripts/xr004_cloud.gd")
 const PlayerSpace = preload("res://scripts/xr004_space.gd")
 const ROUTES := ["intro","lobby","preview","practice","settings","account","profile","login"]
 var cloud: Cloud
-var practice_saved := false
 
 func _ready() -> void:
 	cloud = Cloud.new()
@@ -41,6 +40,7 @@ func _request(id: String, reload: bool = false) -> bool:
 		ray.visible = false
 	hover = ["",""]
 	if route == "login":
+		cloud.cancel_login()
 		var screen := current as PlayerSpace
 		screen.email_text = ""
 		screen.password_text = ""

@@ -68,7 +68,7 @@ func _profile() -> void:
 		label3(panel,"%s  /  %d selects  /  %s" % [str(item.get("recorded_at","")).left(10),int(item.get("score",0)),str(item.get("platform",""))],Vector3(0,0.14-i*0.13,0.025),0.07,Color.WHITE)
 	_button("sync" if account_active else "clear_guest","SYNC  /  %d PENDING" % pending_count if account_active else "CLEAR GUEST RECORDS","Results are practice, not grades",-0.47)
 	_button("lobby","BACK TO HUB","Continue adventure",-0.83)
-	status_label = label3(panel,account_note,Vector3(0,-0.13-0.13*mini(recent.size(),2),0.025),0.063,MINT)
+	status_label = label3(panel,account_note,Vector3(0,-0.27,0.025),0.063,MINT)
 
 func _key(id: String, text: String, x: float, y: float, width: float = 0.27) -> Label3D:
 	var center := Vector2(x,y)
@@ -89,7 +89,7 @@ func _login() -> void:
 	_key("backspace","DEL",0,-1.03,0.8)
 	_key("submit_login","SIGN IN",1.14,-1.03,1.05)
 	_key("account","BACK",-1.15,-1.28,1.05)
-	status_label = label3(panel,account_note,Vector3(0.60,-1.28,0.025),0.064,MINT)
+	status_label = label3(panel,account_note,Vector3(0.60,-1.23,0.025),0.064,MINT)
 	_refresh_keyboard()
 
 func _refresh_keyboard() -> void:

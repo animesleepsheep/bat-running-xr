@@ -101,6 +101,7 @@ func _accept_session(data: Dictionary) -> bool:
 	if not records.account.is_empty() and records.account != uid:
 		return false
 	if records.account.is_empty():
+		records.clear_guest()
 		records.set_account(uid)
 	access = a
 	refresh = r
@@ -145,7 +146,16 @@ func sync() -> void:
 	else:
 		_notify("Profile unavailable. Retry sync.")
 
+func cancel_login() -> void:
+	if busy and records.account.is_empty():
+		generation += 1
+		busy = false
+		_notify("Sign-in cancelled")
+
 func sign_out(discard: bool = false) -> bool:
+	if busy:
+		_notify("Sync in progress. Try again after completion.")
+		return false
 	if not records.queue.is_empty() and not discard:
 		_notify("Sync first or choose discard + sign out")
 		return false
